@@ -10,6 +10,7 @@ endif()
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  rosbag
   roscpp
   rospy
   nav_msgs
@@ -57,3 +58,7 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 ## Declare a cpp executable
 add_executable(rf2o_laser_odometry_node src/CLaserOdometry2DNode.cpp)
 target_link_libraries(rf2o_laser_odometry_node ${PROJECT_NAME} ${catkin_LIBRARIES})
+
+## Declare a cpp executable
+add_executable(rf2o_laser_odometry_bag src/CLaserOdometry2DBag.cpp)
+target_link_libraries(rf2o_laser_odometry_bag ${PROJECT_NAME} ${catkin_LIBRARIES})

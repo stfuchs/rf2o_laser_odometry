@@ -156,7 +156,7 @@ void CLaserOdometry2D::init(const sensor_msgs::LaserScan& scan,
   kai_loc_old_ = MatrixS31::Zero();
 
   module_initialized = true;
-  last_odom_time = ros::Time::now();
+  last_odom_time = scan.header.stamp;
 }
 
 const CLaserOdometry2D::Pose3d& CLaserOdometry2D::getIncrement() const
@@ -179,6 +179,16 @@ const CLaserOdometry2D::Pose3d& CLaserOdometry2D::getPose() const
   return robot_pose_;
 }
 
+double CLaserOdometry2D::getLinearVelocity() const
+{
+  return lin_speed;
+}
+
+double CLaserOdometry2D::getAngularVelocity() const
+{
+  return ang_speed;
+}
+
 bool CLaserOdometry2D::odometryCalculation(const sensor_msgs::LaserScan& scan)
 {
   //==================================================================================
@@ -187,7 +197,7 @@ bool CLaserOdometry2D::odometryCalculation(const sensor_msgs::LaserScan& scan)
 
   //copy laser scan to internal variable
   range_wf = Eigen::Map<const Eigen::MatrixXf>(scan.ranges.data(), width, 1);
-
+  current_scan_time = scan.header.stamp;
   ros::WallTime start = ros::WallTime::now();
 
   createImagePyramid();

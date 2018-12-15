@@ -93,6 +93,9 @@ public:
   Pose3d& getPose();
   const Pose3d& getPose() const;
 
+  double getLinearVelocity() const;
+  double getAngularVelocity() const;
+
 protected:
 
   bool verbose, module_initialized, first_laser_scan;
