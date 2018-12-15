@@ -324,7 +324,7 @@ void CLaserOdometry2D::createImagePyramid()
             for (int l=-2; l<3; l++)
             {
               const int indu = u+l;
-              if ((indu>=0)&&(indu<cols_i))
+              if ((indu>=0)&&(indu<static_cast<int>(cols_i)))
               {
                 const float abs_dif = std::abs(range_wf(indu)-dcenter);
                 if (abs_dif < max_range_dif)
@@ -390,7 +390,7 @@ void CLaserOdometry2D::createImagePyramid()
             for (int l=-2; l<3; l++)
             {
               const int indu = u2+l;
-              if ((indu>=0)&&(indu<cols_i2))
+              if ((indu>=0)&&(indu<static_cast<int>(cols_i2)))
               {
                 const float abs_dif = std::abs(range[i_1](indu)-dcenter);
                 if (abs_dif < max_range_dif)

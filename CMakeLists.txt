@@ -1,18 +1,15 @@
 PROJECT(rf2o_laser_odometry)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.3)
-# Require C++17
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
 
-if(${CMAKE_VERSION} VERSION_LESS "3.8.0")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-else()
-	set(CMAKE_CXX_STANDARD 17)
+if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Werror")
 endif()
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS  
+find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   nav_msgs
@@ -24,7 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
-find_package(Eigen3 REQUIRED)
+find_package(Eigen REQUIRED COMPONEENTS Dense)
 
 ###################################
 ## catkin specific configuration ##
@@ -36,7 +33,7 @@ find_package(Eigen3 REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
- INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIRS}
+ INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
  LIBRARIES ${PROJECT_NAME}
  CATKIN_DEPENDS nav_msgs roscpp sensor_msgs std_msgs tf
  DEPENDS #Eigen3
@@ -50,7 +47,7 @@ include_directories(
   SYSTEM
   ${catkin_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIRS}
+  ${Eigen_INCLUDE_DIRS}
 )
 
 ## Declare a cpp library
