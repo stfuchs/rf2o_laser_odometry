@@ -52,7 +52,7 @@ bool CLaserOdometry2D::is_initialized()
 }
 
 void CLaserOdometry2D::init(const sensor_msgs::LaserScan& scan,
-                            const geometry_msgs::Pose& initial_robot_pose)
+                            const Pose3d& initial_robot_pose)
 {
   //Got an initial scan laser, obtain its parametes
   ROS_INFO_COND(verbose, "[rf2o] Got first Laser Scan .... Configuring node");
@@ -64,15 +64,7 @@ void CLaserOdometry2D::init(const sensor_msgs::LaserScan& scan,
   ctf_levels = 5;                     // Coarse-to-Fine levels
   iter_irls  = 5;                      //Num iterations to solve iterative reweighted least squares
 
-  Pose3d robot_initial_pose = Pose3d::Identity();
-
-  robot_initial_pose = Eigen::Quaterniond(initial_robot_pose.orientation.w,
-                                          initial_robot_pose.orientation.x,
-                                          initial_robot_pose.orientation.y,
-                                          initial_robot_pose.orientation.z);
-
-  robot_initial_pose.translation()(0) = initial_robot_pose.position.x;
-  robot_initial_pose.translation()(1) = initial_robot_pose.position.y;
+  Pose3d robot_initial_pose = initial_robot_pose;
 
   ROS_INFO_STREAM_COND(verbose, "[rf2o] Setting origin at:\n"
                        << robot_initial_pose.matrix());

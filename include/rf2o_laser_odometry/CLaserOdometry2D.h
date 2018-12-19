@@ -27,6 +27,7 @@
 #include <ros/ros.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/LaserScan.h>
+#include <geometry_msgs/Transform.h>
 
 // Eigen headers
 #include <Eigen/Dense>
@@ -63,6 +64,18 @@ inline Eigen::Matrix<T, 3, 3> matrixYaw(const T yaw)
   return matrixRollPitchYaw<T>(0, 0, yaw);
 }
 
+inline Eigen::Isometry3d fromMsg(const geometry_msgs::Transform& msg)
+{
+  return Eigen::Translation3d(msg.translation.x, msg.translation.y, msg.translation.z) *
+    Eigen::Quaterniond(msg.rotation.w, msg.rotation.x, msg.rotation.y, msg.rotation.z);
+}
+
+inline Eigen::Isometry3d fromMsg(const geometry_msgs::Pose& msg)
+{
+  return Eigen::Translation3d(msg.position.x, msg.position.y, msg.position.z) *
+    Eigen::Quaterniond(msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z);
+}
+
 class CLaserOdometry2D
 {
 public:
@@ -78,13 +91,14 @@ public:
   virtual ~CLaserOdometry2D() = default;
 
   void init(const sensor_msgs::LaserScan& scan,
-            const geometry_msgs::Pose& initial_robot_pose);
+            const Pose3d& initial_robot_pose);
 
   bool is_initialized();
 
   bool odometryCalculation(const sensor_msgs::LaserScan& scan);
 
   void setLaserPose(const Pose3d& laser_pose);
+  inline void setVerbose(bool enable) { verbose = enable; }
 
   const Pose3d& getIncrement() const;
 

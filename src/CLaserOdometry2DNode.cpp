@@ -17,8 +17,10 @@
 
 #include "rf2o_laser_odometry/CLaserOdometry2D.h"
 
-#include <tf/transform_broadcaster.h>
-#include <tf/transform_listener.h>
+#include <tf/transform_datatypes.h>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/transform_broadcaster.h>
 
 namespace rf2o {
 
@@ -46,12 +48,13 @@ public:
   std::string         odom_frame_id;
   std::string         init_pose_from_topic;
 
-  ros::NodeHandle             n;
-  sensor_msgs::LaserScan      last_scan;
-  bool                        GT_pose_initialized;
-  tf::TransformListener       tf_listener;          //Do not put inside the callback
-  tf::TransformBroadcaster    odom_broadcaster;
-  nav_msgs::Odometry          initial_robot_pose;
+  ros::NodeHandle               n;
+  sensor_msgs::LaserScan        last_scan;
+  bool                          GT_pose_initialized;
+  tf2_ros::Buffer               tf_buffer;
+  tf2_ros::TransformListener    tf_listener;          //Do not put inside the callback
+  tf2_ros::TransformBroadcaster odom_broadcaster;
+  nav_msgs::Odometry            initial_robot_pose;
 
   //Subscriptions & Publishers
   ros::Subscriber laser_sub, initPose_sub;
@@ -64,8 +67,9 @@ public:
   void initPoseCallBack(const nav_msgs::Odometry::ConstPtr& new_initPose);
 };
 
-CLaserOdometry2DNode::CLaserOdometry2DNode() :
-  CLaserOdometry2D()
+CLaserOdometry2DNode::CLaserOdometry2DNode()
+  : CLaserOdometry2D()
+  , tf_listener(tf_buffer)
 {
   ROS_INFO("Initializing RF2O node...");
 
@@ -119,37 +123,19 @@ bool CLaserOdometry2DNode::setLaserPoseFromTf()
 
   // Set laser pose on the robot (through tF)
   // This allow estimation of the odometry with respect to the robot base reference system.
-  tf::StampedTransform transform;
-  transform.setIdentity();
   try
   {
-    tf_listener.lookupTransform(base_frame_id, last_scan.header.frame_id, ros::Time(0), transform);
+    setLaserPose(
+      fromMsg(
+        tf_buffer.lookupTransform(base_frame_id, last_scan.header.frame_id, ros::Time(0)).transform));
     retrieved = true;
   }
-  catch (tf::TransformException &ex)
+  catch (tf2::TransformException &ex)
   {
     ROS_ERROR("%s",ex.what());
     ros::Duration(1.0).sleep();
     retrieved = false;
   }
-
-  //TF:transform -> Eigen::Isometry3d
-
-  const tf::Matrix3x3 &basis = transform.getBasis();
-  Eigen::Matrix3d R;
-
-  for(int r = 0; r < 3; r++)
-    for(int c = 0; c < 3; c++)
-      R(r,c) = basis[r][c];
-
-  Pose3d laser_tf(R);
-
-  const tf::Vector3 &t = transform.getOrigin();
-  laser_tf.translation()(0) = t[0];
-  laser_tf.translation()(1) = t[1];
-  laser_tf.translation()(2) = t[2];
-
-  setLaserPose(laser_tf);
 
   return retrieved;
 }
@@ -196,7 +182,7 @@ void CLaserOdometry2DNode::LaserCallBack(const sensor_msgs::LaserScan::ConstPtr&
     }
     else
     {
-      init(last_scan, initial_robot_pose.pose.pose);
+      init(last_scan, fromMsg(initial_robot_pose.pose.pose));
       first_laser_scan = false;
     }
   }
